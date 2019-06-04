@@ -72,6 +72,7 @@ int checkMap() { // made by 유상진
             return 1; 
         }
     }
+    return 0;
 }
 
 void createCurrentMap() { // made by 유상진
