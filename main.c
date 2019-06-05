@@ -48,7 +48,7 @@ void createMapArray() { // (유상진)
 	// map.txt 파일을 읽어 map[5][30][30] 배열에 저장하는 함수
 	char b[30];
 	FILE *fp;
-	fp = fopen("abcd.txt", "r");
+	fp = fopen("map.txt", "r");
 	int l = 0, index = 0;
 	while (1) {
 		fscanf(fp, "%s", &b); // map.txt 파일을 한 줄씩 읽어들여 b에 저장함
