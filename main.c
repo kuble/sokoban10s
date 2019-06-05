@@ -168,8 +168,13 @@ void command() {
         } else {
             switch (ch) {
                 case 'u':
-
-                    break;
+			if (umap[0][0][0]=='\0'){// umap배열의 첫번째 배열이 null 값이면 되돌리기가 불가능하다는 메세지 출력. (김윤태)
+				printf("남은 되돌리기 횟수가0이 되어 더 이상 되돌리기가 불가능 합니다.");}
+			else{// umap 배열의 첫번째 배열이 null 값이 아니면 이동횟수를 1회 올리고 undo()함수 실행. (김윤태)
+				system("clear");
+				mvCnt++;
+				undo();}
+			break;
                 case 'r': 
 
                     break;
