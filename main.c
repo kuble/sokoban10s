@@ -5,9 +5,11 @@
 char name[10]; // 사용자의 이름울 저장하는 배열
 char map[5][30][30]; // 맵 전체를 저장하는 배열
 char cMap[30][30]; // 현재 맵 번호(cIndex)에 해당하는 맵만을 저장하는 배열
+char uMap[5][30][30]; //undo 사용전 맵을 저장하는 배열 (김윤태)
 
 int cIndex = 0; // 현재 맵 인덱스를 저장하는 변수
 int plX, plY; // 플레이어('@')의 X축, Y축 위치를 저장하는 변수
+int upl[5][2]; //undo를 사용한 후의 '@' 의 위치를 저장하기 위한 배열 (김윤태)
 
 void createMapArray(); // map.txt 파일을 읽어 map[5][30][30] 배열에 저장하는 함수
 int checkMap(); // 각 맵마다 상자와 창고의 갯수가 같은지를 확인하는 함수
@@ -15,6 +17,9 @@ void createCurrentMap(); // 현재 맵 번호(cIndex)에 해당하는 맵을 cMa
 void printMap(); // 현재 맵(cMap[30][30])을 출력하는 함수
 int getch(); // enter 키를 입력할 필요 없이 바로 반응하도록 하는 함수
 void command(); // 사용자로부터 키를 입력 받아 해당 명령을 실행하는 함수
+void recordundo(); //  undo 의 횟수와 undo용으로 쓰일 맵 그리고 플레이어 위치를 저장하는 함수 (김윤태)
+void undo(); //플레이어 이동을 한 칸 되돌리는 함수 (김윤태)
+void resetundo(); // recordundo() 함수로 저장된 값들을 모두 초기화하는 함수 (김윤태)
 
 int main() {
     system("clear");
@@ -121,6 +126,36 @@ int getch() {
     tcsetattr(0, TCSAFLUSH, &save);
     return ch;
 }
+
+void recordundo(){
+	for (int i=4;i>=1;i--){ //저장되어있던 undo용 맵 umap배열의 배열을 한 칸씩 뒤로 빼준다 ( 예 : umap[1][0][0]를 umap[2][0][0]로 ) (김윤태) 
+		for(int j=0;j<30;j++){
+			for(int k=0;k<30;k++)
+				uMap[i][j][k]=uMap[i-1][j][k];}
+		upl[i][0]=upl[i-1][0], upl[i][1]=upl[i-1][1];} //undo 후의 '@' 위치를 표시하는 upl 배열을 위의 uMap과 같이 한 칸씩 뒤로 빼준다 ( 예 : upl[1][0]를 upl[2][0]로 ) (김윤태)
+	for (int i=0;i<30;i++){  // uMap의 0번째 배열에 현재맵 cMap배열을 넣어준다. (김윤태)
+		for (int j=0;j<30;j++){
+			uMap[0][i][j]=cMap[i][j];}}
+	upl[0][0]=plX, upl[0][1]=plY;} //upl[0] 배열에 현재 '@' 의 좌표를 넣어준다. (김윤태)
+
+void undo(){//움직이기 전 위치로 되돌리기. (김윤태)
+	for (int i=0;i<30;i++){
+		for (int j=0;j<30;j++){
+			cMap[i][j]=uMap[0][i][j];}} //현재 맵배열에 undo용으로 저장된 uMap배열의 0번째 배열을 가져온다. (김윤태)
+	plX=upl[0][0],plY=upl[0][1]; //현재 플레이어 '@' 의 X , Y 좌표에 undo후 위치용으로 저장된 배열의 0번째 배열을 가져온다. (김윤태) 
+	for (int i=0;i<=4;i++){
+		for(int j=0;j<30;j++){
+			for(int k=0;k<30;k++)
+				uMap[i][j][k]=uMap[i+1][j][k];} //undo하기 위해 저장된 맵배열 uMap을 한 칸씩 앞으로 가져온다 ( 예 : uMap[1][0][0]를 uMap[0][0][0]로 ) (김윤태)
+		upl[i][0]=upl[i+1][0], upl[i][1]=upl[i+1][1];} //undo후의 '@' 의 위치를 표시하는 upl 배열을 위 uMap과 같이 한 칸씩 앞으로 가져온다( 예 : upl[1][0]를 upl[0][0]로 ) (김윤태)
+	printMap();} //undo후의 맵을 출력한다. (김윤태)
+
+void resetundo(){ //undo 횟수 초기화함수. (김윤태)
+	for (int i=0;i<5;i++){
+		for(int j=0;j<30;j++){
+			for (int k=0;k<30;k++)
+				uMap[i][j][k]='\0';} //uMap배열의 모든 값들을 null 값으로 초기화. (김윤태)
+		upl[i][0]='\0',upl[i][1]='\0';}} //undo후 플레이어 위치인 upl 배열 역시  모두 null 값으로 초기화. (김윤태)
 
 void command() { 
     // 사용자로부터 키를 입력 받아 해당 명령을 실행하는 함수
