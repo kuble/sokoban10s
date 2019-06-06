@@ -2,30 +2,35 @@
 #include <termio.h>
 #include <windows.h>
 
-char name[10] = { 0, };									// 사용자의 이름울 저장하는 배열
+char name[10] = { 0, };									            // 사용자의 이름울 저장하는 배열
 char map[5][30][30] = { {0, }, {0, }, {0, } };			// 맵 전체를 저장하는 배열
-char cMap[30][30] = { {0, }, {0, } };					// 현재 맵 번호(cIndex)에 해당하는 맵만을 저장하는 배열
+char cMap[30][30] = { {0, }, {0, } };					      // 현재 맵 번호(cIndex)에 해당하는 맵만을 저장하는 배열
 char uMap[5][30][30] = { {0, }, {0, }, {0, } };;		// undo 사용전 맵을 저장하는 배열
+char rName[10];                                     // 랭킹을 출력할 때 사용하는 이름의 배열
 
 int cIndex = 0;											// 현재 맵 인덱스를 저장하는 변수
-int plX, plY;											// 플레이어('@')의 X축, Y축 위치를 저장하는 변수
-int cStorage = 0, err = 0;								// 레벨 클리어를 판단하기 위한 변수
+int plX, plY;											  // 플레이어('@')의 X축, Y축 위치를 저장하는 변수
+int cStorage = 0, err = 0;					// 레벨 클리어를 판단하기 위한 변수
 int mvCnt = 0;											// 움직인 횟수
 int upl[5][2];											// undo를 사용한 후의 '@' 의 위치를 저장하기 위한 배열
-int rIndex, rMvCnt;
+int rIndex, rMvCnt;                 // rangking 시스템에서 출력시 보이게될 변수
 
-_Bool nextStage = 0;									// 스테이지 클리어를 판별하는 변수
+_Bool nextStage = 0;								// 스테이지 클리어를 판별하는 변수
 
-void createMapArray();									// map.txt 파일을 읽어 map[5][30][30] 배열에 저장하는 함수
+void createMapArray();							// map.txt 파일을 읽어 map[5][30][30] 배열에 저장하는 함수
 int checkMap();											// 각 맵마다 상자와 창고의 갯수가 같은지를 확인하는 함수
-void createCurrentMap();								// 현재 맵 번호(cIndex)에 해당하는 맵을 cMap[30][30]에 저장하는 함수
+void createCurrentMap();						// 현재 맵 번호(cIndex)에 해당하는 맵을 cMap[30][30]에 저장하는 함수
 void printMap();										// 현재 맵(cMap[30][30])을 출력하는 함수
-int getch();											// enter 키를 입력할 필요 없이 바로 반응하도록 하는 함수
-void recordundo();										// undo 의 횟수와 undo용으로 쓰일 맵 그리고 플레이어 위치를 저장하는 함수
-void undo();											// 플레이어 이동을 한 칸 되돌리는 함수
-void moveCommand(char);									// @를 이동시키기 위한 함수
+int getch();							    			// enter 키를 입력할 필요 없이 바로 반응하도록 하는 함수
+void recordundo();									// undo 의 횟수와 undo용으로 쓰일 맵 그리고 플레이어 위치를 저장하는 함수
+void undo();								  			// 플레이어 이동을 한 칸 되돌리는 함수
+void moveCommand(char);							// @를 이동시키기 위한 함수
 void command();											// 사용자로부터 키를 입력 받아 해당 명령을 실행하는 함수
 void resetundo();										// recordundo() 함수로 저장된 값들을 모두 초기화하는 함수
+void createRangkingFile();          // 랭킹파일이 없을시 생성하는 함수
+void inputRangking();               // 랭킹파일에 순위를 지정하여 rangking.txt파일에 저장하는 함수
+void loadAllRangking();             // 전체 랭킹을 불러오는 함수
+void loadMapRangking(char);         // 보고싶은 맵의 랭킹 하나만을 불러오는 함수
 void manual();											// 'd'를 눌렀을 때 명령 내용 출력을 위한 함수
 
 int main(void) {
@@ -33,12 +38,13 @@ int main(void) {
 	printf("Start....\ninput name : "); // 사용자 이름을 입력받음
 	scanf("%s", &name);
 	createMapArray();
-	if (checkMap() == 1) { // 1을 리턴받으면 그 즉시 프로그램을 종료함
+	if (checkMap() == 1) {              // 1을 리턴받으면 그 즉시 프로그램을 종료함
 		return 0;
 	};
 	createCurrentMap();
+	createRangkingFile();
 	system("clear");
-	printf("Hello %s\n\n", name); // 인삿말
+	printf("Hello %s\n\n", name);       // 인삿말
 	printMap();
 	command();
 	return 0;
@@ -52,14 +58,14 @@ void createMapArray() { // (유상진)
 	int l = 0, index = 0;
 	while (1) {
 		fscanf(fp, "%s", &b); // map.txt 파일을 한 줄씩 읽어들여 b에 저장함
-		if (b[0] == 'e') { // b 배열의 처음이 'e'면 map.txt 읽기를 종료함
+		if (b[0] == 'e') {    // b 배열의 처음이 'e'면 map.txt 읽기를 종료함
 			break;
 		}
 		else if (b[0] >= 49 && b[0] <= 53) { // b 배열의 처음이 1과 5사이 숫자라면 index를 해당 숫자로 바꾸고 줄 수를 0으로 초기화함
 			index = b[0] - 49;
 			l = 0;
 		}
-		else { // map.txt 파일로부터 읽은 b 배열을 map[5][30][30] 배열에 넣음
+		else {    // map.txt 파일로부터 읽은 b 배열을 map[5][30][30] 배열에 넣음
 			for (int i = 0; i < 30; i++) {
 				map[index][l][i] = b[i];
 			}
@@ -106,11 +112,11 @@ void printMap() { // (유상진)
 	// 현재 맵(cMap[30][30])을 출력하는 함수
 	cStorage = 0, err = 0;
 	for (int i = 0; i < 30; i++) {
-		if (cMap[i][0] == '\0') { // 빈 줄은 출력하지 않음
+		if (cMap[i][0] == '\0') {        // 빈 줄은 출력하지 않음
 			break;
 		}
 		for (int j = 0; j < 30; j++) {
-			if (cMap[i][j] == '\0') { // 빈 칸은 출력하지 않음
+			if (cMap[i][j] == '\0') {      // 빈 칸은 출력하지 않음
 				break;
 			}
 			else if (map[cIndex][i][j] == 'O') { // '@'나 '$'가 아니라면 map 배열에서 'O'인 칸은 무조건 'O'로 출력
@@ -124,7 +130,7 @@ void printMap() { // (유상진)
 					err++;
 				}
 			}
-			if (cMap[i][j] == '.') { // '.'을 ' '로 출력함
+			if (cMap[i][j] == '.') {    // '.'을 ' '로 출력함
 				printf(" ");
 			}
 			else {
@@ -242,6 +248,113 @@ void resetundo() { // (김윤태)
 	}
 } // undo후 플레이어 위치인 upl 배열 역시 모두 null 값으로 초기화
 
+void createRangkingFile() {                         //(이창우)
+				FILE *fp;
+				fp = fopen("rangking.txt", "r");
+				if (fp == 0) {                              //랭킹파일이 없는경우
+								fclose(fp);
+								fp = fopen("rangking.txt", "w");    //랭킹파일을 쓰기형식으로 생성하여 연다.
+								fprintf(fp, "%d",100);               
+				}
+				fclose(fp);
+}
+
+void inputRangking(){                               //(이창우)
+				int infront = 0, limitFive = 0;             //순위조정, 5개 제한을  위한 변수
+				FILE *ifp, *ofp;
+				ifp = fopen("rangking.txt", "r");           //rangking.txt파일을 읽어들여 순위를 지정
+				while (1){                                  //순위가 제자리를 찾아갈때까지 반복
+								fscanf(ifp, "%d %s %d", &rIndex, &rName, &rMvCnt);            
+								if ((rIndex -1 < cIndex) || ((rIndex - 1 == cIndex) && (rMvCnt < mvCnt))){
+												infront++;
+								}
+								else{
+												break;
+								}
+				}
+				fclose(ifp);                                
+				ifp = fopen("rangking.txt", "r"), ofp = fopen("newRangking.txt", "w");
+				for (int i = 0; i < infront; i++) {        //rangking.txt에서 받아온 정보를 new rangking.txt에 저장
+        		fscanf(ifp, "%d %s %d", &rIndex, &rName, &rMvCnt);
+        		fprintf(ofp, "%d %s %d\n", rIndex, rName, rMvCnt);
+        		if (rIndex - 1 == cIndex){
+            		limitFive++;
+        		}
+    		}
+    		fprintf(ofp, "%d %s %d\n", cIndex + 1, name, mvCnt);
+    		limitFive++;
+    		while(1){
+       		 fscanf(ifp, "%d %s %d", &rIndex, &rName, &rMvCnt);
+        		if(rIndex == 100){
+           		 fprintf(ofp, "%d", 100);             //100이 보이면 종료         
+ 							 break;
+        		} 
+						else if(rIndex - 1 == cIndex){          //limitFive 즉 5위 이내에 순위 배정이 되어있으면 출력
+           		 if(limitFive < 5){                   
+              		  fprintf(ofp, "%d %s %d\n", rIndex, rName, rMvCnt);
+                		limitFive++;
+            		}
+        		}
+        		else{
+         		   fprintf(ofp, "%d %s %d\n", rIndex, rName, rMvCnt);
+        		}
+    		}
+    		fclose(ifp), fclose(ofp);
+    		ifp = fopen("rangking.txt", "w"), ofp = fopen("newRangking.txt", "r");
+    		while(1){
+        		fscanf(ofp, "%d %s %d", &rIndex, &rName, &rMvCnt);
+        		if(rIndex == 100){
+           		 fprintf(ifp, "%d", 100);
+           		 break;
+    		    } 
+						else{
+		            fprintf(ifp, "%d %s %d\n", rIndex, rName, rMvCnt);
+		        }
+ 		   }
+  		  fclose(ifp), fclose(ofp);
+  		  remove("newRangking.txt");
+		}
+		
+void loadAllRangking(){ 													  // (이창우) 전체 랭킹을 출력
+  	int previousRIndex = 0, rank = 1;
+   	printf("\n전체 맵 랭킹을 출력합니다.\n");
+   	FILE *fp;
+   	fp = fopen("rangking.txt", "r");
+   	while(1){                                       //rangking.txt의 내용을 입력받고, 전체 랭킹을 출력함
+   		  previousRIndex = rIndex;
+      	fscanf(fp, "%d %s %d", &rIndex, &rName, &rMvCnt);
+       	if(rIndex == 100){
+       	    break;
+        } 
+			  else{
+       	  if(rIndex != previousRIndex){
+         	 	 printf("\n%d번 맵 랭킹\n\n", rIndex);
+           	 rank = 1;
+          }
+        printf("%d위\t이름: %-10s\t이동횟수: %d\n", rank, rName, rMvCnt);
+        rank++;
+     	  }
+	  }
+    fclose(fp);
+}
+
+void loadMapRangking (char a) { 										// (이창우) 해당 번호의 맵 랭킹만 출력
+    int rank = 1;
+    printf("%c번 맵 랭킹을 출력합니다.\n\n", a);
+    FILE *fp;
+    fp = fopen("rangking.txt", "r");            
+    while(1){                                       //해당 번호의 rIndex(rangking에서의 맵 번호)를 찾아 그 랭킹만 출력
+        fscanf(fp, "%d %s %d", &rIndex, &rName, &rMvCnt);
+        if(a - 48 == rIndex){
+            printf("%d위\t이름: %-10s\t이동횟수: %d\n", rank, rName, rMvCnt);
+            rank++;
+        } 
+				else if(a - 49 < rIndex){
+            break;
+        }
+    }
+}
+
 void manual() { // (이성현)
 	printf("\nh(왼쪽), j(아래), k(위), l(오른쪽)\n");
 	printf("u(undo)\n");
@@ -262,7 +375,24 @@ void command() {
 		printf("\n");
 		ch = getch();
 		if (ch == 't') { // 전체 맵 순위만 출력할지 특정한 맵 순위만 출력할건지 다시 입력받아야 하므로 if문을 통해 구분함
-			
+            printf("t ");
+            char a = getchar();
+            system("clear");
+            printMap();
+            if(a == '\n'){
+                loadAllRangking();
+            } 
+						else{
+                if((a >= '1' && a <= '5') && (map[a - 49][0][0] != '\0')){
+                    printf("\n");
+                    loadMapRangking(a);
+                }
+								else{
+                    printf("\n해당 맵이 존재하지 않습니다.\n");
+                }
+                ch = getchar();
+            }
+            printf("\n");
 		}
 		else {
 			switch (ch) {
