@@ -438,6 +438,7 @@ void command() {
 			if (nextStage) {
 				system("clear");
 				printf("\n%d레벨 클리어!!!\n", cIndex + 1);
+				inputRangking();
 				mvCnt = 0, nextStage = 0, cIndex++;
 				resetundo();
 				if (map[cIndex][0][0] == '\0') {
