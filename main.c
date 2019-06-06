@@ -56,7 +56,7 @@ void createMapArray() { // (유상진)
 	// map.txt 파일을 읽어 map[5][30][30] 배열에 저장하는 함수
 	char b[30];
 	FILE *fp;
-	fp = fopen("abcd.txt", "r");
+	fp = fopen("map.txt", "r");
 	int l = 0, index = 0;
 	while (1) {
 		fscanf(fp, "%s", &b); 						// map.txt 파일을 한 줄씩 읽어들여 b에 저장함
@@ -435,24 +435,24 @@ void command() {
 		printf("\n");
 		ch = getch();
 		if (ch == 't') { 						// 전체 맵 순위만 출력할지 특정한 맵 순위만 출력할건지 다시 입력받아야 하므로 if문을 통해 구분함
-            printf("t ");
-            char a = getchar();
-            system("clear");
-            printMap();
-            if(a == '\n'){
-                loadAllRangking();
+            		printf("t ");
+	            	char a = getchar();
+        	    	system("clear");
+            		printMap();
+            		if(a == '\n'){
+                		loadAllRangking();
 			} 
 			else {
 				if((a >= '1' && a <= '5') && (map[a - 49][0][0] != '\0')) {
 					printf("\n");
-        			loadMapRangking(a);
+	        			loadMapRangking(a);
 				}
 				else{
 					printf("\n해당 맵이 존재하지 않습니다.\n");
 				}
-                ch = getchar();
-            }
-            printf("\n");
+	                ch = getchar();
+        	    	}
+            		printf("\n");
 		}
 		else {
 			switch (ch) {
