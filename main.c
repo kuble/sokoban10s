@@ -92,6 +92,7 @@ int checkMap() { // (유상진)
 			}
 		}
 		if (b != s) { 							// 박스 갯수와 창고 갯수가 다를 경우 1을 리턴함
+			printf("박스와 창고의 갯수가 같지 않습니다. 게임을 종료합니다.");
 			return 1;
 		}
 	}
@@ -485,6 +486,7 @@ void command() {
 				break;
 			case 'e': 						// 무한반복을 끝내고 탈출함
 				system("clear");
+				printf("SEE YOU %s...",name);
 				goto EXIT;
 			case 's':						// 현재 맵 상태를 저장함
 				saveMap();
@@ -497,9 +499,15 @@ void command() {
 				loadMap();
 				break;
 			case 'd': 						// 매뉴얼 출력
-				system("clear");
-				printMap();
-				manual();
+				if (ch == 'd'){
+								printf("d");
+								char b= getchar();
+								if (b == '\n')
+								{
+												system("clear");
+												manual();
+								}
+				}
 				break;
 			default:
 				if (ch == 'h' || ch == 'j' || ch == 'k' || ch == 'l') { // 이동키일경우 moveCommand() 함수 실행
