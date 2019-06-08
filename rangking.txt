@@ -1,0 +1,16 @@
+1 sj 318
+1 lcw 344
+1 yt 363
+1 lee 428
+1 kuble 436
+2 lcw 602
+2 yt 652
+2 lee 671
+2 sj 703
+2 kuble 736
+3 sj 1179
+3 lcw 1268
+3 lee 1352
+4 lcw 1797
+5 lcw 2033
+100
