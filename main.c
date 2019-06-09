@@ -256,7 +256,7 @@ void createRangkingFile() { // (이창우)
 	fp = fopen("rangking", "r");
 	if (fp == 0) {                              				// 랭킹파일이 없는경우
 		fclose(fp);
-		fp = fopen("rangking.txt", "w");    				// 랭킹파일을 쓰기형식으로 생성하여 연다.
+		fp = fopen("rangking", "w");    				// 랭킹파일을 쓰기형식으로 생성하여 연다.
 		fprintf(fp, "%d",100);               
 	}
 	fclose(fp);
