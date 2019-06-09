@@ -375,7 +375,7 @@ void manual() { // (이성현)
 void saveMap() { // (유상진)
 	// 현재 맵 상태를 sokoban 파일에 저장함
 	FILE *fp;
-	fp = fopen("sokoban", "w");일
+	fp = fopen("sokoban", "w");
 	fprintf(fp, "%d\n", cIndex + 1); // 현재 맵 번호 저장
 	fprintf(fp, "%d\n", mvCnt); // 이동 횟수 저장
 	for (int i = 0; i < 30; i++) {
