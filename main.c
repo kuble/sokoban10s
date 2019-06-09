@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <termio.h>
 #include <windows.h>
+#include <string.h>
 
-char name[10] = { 0, };								// 사용자의 이름울 저장하는 배열
+char name[11] = { 0, };								// 사용자의 이름울 저장하는 배열
 char map[5][30][30] = { {0, }, {0, }, {0, } };					// 맵 전체를 저장하는 배열
 char cMap[30][30] = { {0, }, {0, } };					      	// 현재 맵 번호(cIndex)에 해당하는 맵만을 저장하는 배열
 char uMap[5][30][30] = { {0, }, {0, }, {0, } };;				// undo 사용전 맵을 저장하는 배열
@@ -40,6 +41,11 @@ int main(void) {
 	system("clear");
 	printf("Start....\ninput name : "); 					// 사용자 이름을 입력받음
 	scanf("%s", &name);
+	while (strlen(name) > 10) {
+		system("clear");
+		printf("이름이 너무 깁니다. 10글자 이내로 다시 입력하세요.\n\ninput name : ");
+		scanf("%s", &name);
+	}
 	createMapArray();
 	if (checkMap() == 1) {              					// 1을 리턴받으면 그 즉시 프로그램을 종료함
 		return 0;
