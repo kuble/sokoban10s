@@ -291,8 +291,10 @@ void inputRangking() { // (이창우)
 			limitFive++;
 		}
 	}
-	fprintf(ofp, "%d %s %d\n", cIndex + 1, name, mvCnt);
-	limitFive++;
+	if (limitFive + 1 <= 5) {
+		fprintf(ofp, "%d %s %d\n", cIndex + 1, name, mvCnt);
+		limitFive++;
+	}
 	while (1) {
 		fscanf(ifp, "%d %s %d", &rIndex, &rName, &rMvCnt);
 		if (rIndex == 100) {
